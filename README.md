@@ -28,7 +28,64 @@ Core Features:
 ## Architecture
 The system decouples deterministic extraction from language model reasoning:
 
-User Upload -> Regex Stream Parser -> Data Aggregation (Pandas) -> LangGraph Orchestration -> Chainlit UI Rendering
+```mermaid
+graph TD
+    %% Core Styling
+    classDef user fill:#2C3E50,stroke:#34495E,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef frontend fill:#3498DB,stroke:#2980B9,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef backend fill:#E67E22,stroke:#D35400,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef data fill:#9B59B6,stroke:#8E44AD,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef ai fill:#2ECC71,stroke:#27AE60,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+    classDef database fill:#E74C3C,stroke:#C0392B,stroke-width:2px,color:#fff,rx:5px,ry:5px;
+
+    %% Components
+    User((User Engineer)):::user
+    
+    subgraph "Presentation Layer (Chainlit)"
+        UI[Interactive Chat UI]:::frontend
+        Charts[Plotly Visualizations]:::frontend
+        Tables[Pandas DataFrames]:::frontend
+    end
+    
+    subgraph "Deterministic Extraction Layer"
+        FileBuffer[Zero-Retention Temp Storage]:::data
+        Parser{Streaming Regex Parser}:::backend
+        FloodExtract[Flooded Nodes Extraction]:::data
+        SurchargeExtract[Surcharged Conduits Extraction]:::data
+    end
+    
+    subgraph "AI Orchestration Layer (LangGraph)"
+        AgentGraph[Stateful Agent Graph]:::ai
+        ToolExecutor[Tool Integration Engine]:::ai
+        LLM((OpenAI GPT-4o)):::ai
+    end
+    
+    subgraph "Cloud Persistence"
+        Supabase[(Supabase PostgreSQL)]:::database
+    end
+
+    %% Data Flow
+    User -- "Uploads MASSIVE .rpt file" --> UI
+    UI -- "Streams file chunks" --> FileBuffer
+    FileBuffer -- "Reads Line-by-Line" --> Parser
+    
+    Parser -- "Rules-based matching" --> FloodExtract
+    Parser -- "Rules-based matching" --> SurchargeExtract
+    
+    FloodExtract -- "Passes Structured Data" --> ToolExecutor
+    SurchargeExtract -- "Passes Structured Data" --> ToolExecutor
+    
+    UI -- "Asks for Analysis" --> AgentGraph
+    AgentGraph <--> ToolExecutor
+    AgentGraph <--> LLM
+    
+    AgentGraph -- "Streams Engineering Summary" --> UI
+    ToolExecutor -- "Triggers UI Rendering" --> Charts
+    ToolExecutor -- "Triggers UI Rendering" --> Tables
+    
+    UI -- "Logs Chat Session" --> Supabase
+    ToolExecutor -- "Logs Metric Analytics" --> Supabase
+```
 
 ## Tech Stack
 - Python 3.13
