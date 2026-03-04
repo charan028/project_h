@@ -100,7 +100,7 @@ graph TD
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/model_h.git
+git clone https://github.com/charan028/model_h.git
 cd model_h/app
 
 python3 -m venv venv
